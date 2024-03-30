@@ -1,43 +1,18 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[13]:
-
-
 #import the libraries
 import pandas as pd
 import sqlite3
 
-
-# In[14]:
-
-
 #Establish a Connection to the databse file
 conn = sqlite3.connect(r'C:\Users\Shift\Desktop\work\Data Analysis\students_marks\FEEE_V2.db')
 
-
-# In[32]:
-
-
 #Execute SQL Queries and Retrieve Data into DataFrames
-query1 = "SELECT * FROM ONE"
-query2 = "SELECT * FROM TWO"
-query3 = "SELECT * FROM THREE"
-query4 = "SELECT * FROM FOUR"
-query5 = "SELECT * FROM FIVE"
+query = "SELECT * FROM ONE"
 
-df_one = pd.read_sql_query(query1, conn)
-df_two = pd.read_sql_query(query2, conn)
-df_three = pd.read_sql_query(query3, conn)
-df_four = pd.read_sql_query(query4, conn)
-df_five = pd.read_sql_query(query5, conn)
+df = pd.read_sql_query(query, conn)
 
 
-# In[43]:
-
-
-# Create a clean copy of df
-df_clean = df_three.copy()
+# Create a copy of the raw dataframe to work on.
+dfclean = df.copy()
 
 # Drop the 'Rate' column
 df_clean = df_clean.drop('Rate', axis=1)
@@ -164,7 +139,7 @@ text_mapping = {
     'قسم تحكم ':'delete',
 }
 
-# Define a mapping dictionary for numeric Columns to be cleaned
+# Define a mapping dictionary for numeric columns to be cleaned
 numeric_mapping = {
     'ناجح سابقا': '0',
     'ناجح  سابق':'0',
@@ -288,6 +263,7 @@ numeric_mapping = {
 
 # Replace the values in 'Status' column
 df_clean['Status'] = df_clean['Status'].replace(text_mapping)
+df_clean['Status'] = df_clean['Status'].replace(text_mapping)
 
 # Replace specific values in 'OfficalYear' column
 df_clean['OfficalYear'] = df_clean['OfficalYear'].str.replace('2022-2021', '2021-2022')
@@ -312,9 +288,6 @@ df_clean['Practical'] = df_clean['Practical'].replace(numeric_mapping)
 df_clean['Practical'] = df_clean['Practical'].fillna('0')
 
 
-# In[44]:
-
-
 #sort the dataframe in order to drop the empty rows
 df_clean = df_clean.sort_values(by = 'TotalInt', ascending = True)
 
@@ -333,6 +306,7 @@ df_clean = df_clean.drop(df_clean.index[0:2099])
 #reset the index to be normal again
 df_clean.reset_index(drop=True)
     
+#I used here the regular expressions to manipulate text data
 #([a-zA-Z]{1,2}): captures two or two consecutive alphabetic characters (department prefix)
 #(\d+): captures two or more consecutive digits (ID)
 df_clean[['Department', 'ID']] = df_clean['ID'].str.extract(r'([a-zA-Z]{1,2})(\d+)')
@@ -352,5 +326,4 @@ df_clean['Department']=df_clean['Department'].str.upper()
 #rename TotalInt column
 df_clean.rename(columns={'TotalInt': 'Total'}, inplace=True)
 
-df_clean.to_csv('C:/Users/Shift/Desktop/work/Data Analysis/students_marks/CSVs/two_clean.csv', encoding='utf-8-sig', index=True)
-
+df_clean.to_csv('C:/Users/Shift/Desktop/work/Data Analysis/students_marks/CSVs/clean_data.csv', encoding='utf-8-sig', index=True)
